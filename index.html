@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home — Lex</title>
+  <style>
+    :root{--bg1:#0f172a;--bg2:#0b1220;--card:#0b1226;--accent:#7c5cff;--muted:#9aa4bf;--text:#e6eef8}
+    body.light-theme {
+      --bg1:#f5f5f7;--bg2:#ffffff;--card:#ffffff;--accent:#7c5cff;--muted:#6b7280;--text:#1f2937;
+    }
+    body.auto-theme {
+      color-scheme: light dark;
+    }
+    *{box-sizing:border-box}
+    body{min-height:100vh;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);padding:20px}
+    .header{display:flex;justify-content:space-between;align-items:center;max-width:1000px;margin:0 auto 40px;padding:0 28px}
+    .brand-header{display:flex;align-items:center;gap:10px}
+    .logo{width:40px;height:40px;border-radius:10px;display:inline-grid;place-items:center;background:linear-gradient(135deg,#fff2 0%,#ffffff05 100%);color:var(--accent);font-weight:700}
+    .nav-links{display:flex;gap:24px}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-links a.active{color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px}
+    .container{max-width:1000px;margin:0 auto}
+    .welcome{margin-bottom:40px}
+    h1{margin:0 0 8px;font-size:32px}
+    .subtitle{color:var(--muted);font-size:15px;margin:0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:80px}    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(11,18,32,0.95));display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px)}
+    .loading-overlay.show{display:flex}
+    .loading-container{text-align:center;animation:fadeInScale .4s cubic-bezier(.2,.9,.3,1) both}
+    @keyframes fadeInScale{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .loading-text{font-size:48px;font-weight:700;color:var(--accent);margin:0 0 24px;letter-spacing:2px;animation:pulse 1s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.8}}
+    .loading-dots{font-size:32px;color:var(--accent);letter-spacing:8px;animation:blink 1.4s infinite}
+    @keyframes blink{0%,20%,50%,80%,100%{opacity:1}40%{opacity:.3}60%{opacity:.3}}    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:28px 24px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04);animation:lift .7s cubic-bezier(.2,.9,.3,1) both}
+    body.light-theme .card{background:linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:rgba(0,0,0,0.06)}    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:flex-start;justify-content:flex-start;padding-top:40px;padding-left:20px;z-index:1000}
+    .modal-overlay.show{display:flex}
+    .modal{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:24px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04);max-width:320px;animation:lift .3s cubic-bezier(.2,.9,.3,1) both}
+    .modal h2{margin:0 0 12px;font-size:18px;color:#e6eef8}
+    .modal p{margin:0 0 20px;color:var(--muted);font-size:14px}
+    .modal-buttons{display:flex;gap:12px}
+    .modal-buttons button{flex:1;padding:10px 16px;border-radius:10px;border:0;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s;font-size:14px}
+    .modal-buttons .confirm{background:linear-gradient(90deg,var(--accent),#5aa0ff);color:#081126}
+    .modal-buttons .cancel{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
+    .modal-buttons button:active{transform:translateY(1px)}    @keyframes lift{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+    .card h2{margin:0 0 12px;font-size:18px}
+    .card p{margin:0 0 16px;color:var(--muted);font-size:14px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#5aa0ff);color:#081126;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s;font-size:14px;text-decoration:none}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
+    .btn.secondary:hover{color:#e6eef8;border-color:rgba(255,255,255,0.08)}
+    .icon{width:40px;height:40px;border-radius:8px;background:rgba(124,92,255,0.1);display:grid;place-items:center;margin-bottom:12px;font-size:20px}
+    .preview-image{width:100%;height:180px;background:linear-gradient(135deg,rgba(124,92,255,0.1),rgba(90,160,255,0.1));border-radius:10px;margin:16px 0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);overflow:hidden;position:relative}
+    .preview-image canvas{width:100%;height:100%;display:block}
+    .prompt-section{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:24px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04);margin-bottom:30px}
+    body.light-theme .prompt-section{background:linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:rgba(0,0,0,0.06)}
+    .prompt-section h2{margin:0 0 12px;font-size:18px;color:var(--text)}
+    .prompt-input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.02);color:var(--text);font-family:inherit;font-size:14px;resize:vertical;min-height:100px;transition:all .2s}
+    .prompt-input:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,0.05);box-shadow:0 0 0 3px rgba(124,92,255,0.1)}
+    body.light-theme .prompt-input{border-color:rgba(0,0,0,0.1);background:rgba(0,0,0,0.02);color:#1f2937}
+    body.light-theme .prompt-input:focus{border-color:var(--accent);background:rgba(0,0,0,0.05);box-shadow:0 0 0 3px rgba(124,92,255,0.1)}
+    .prompt-buttons{display:flex;gap:12px;margin-top:12px}
+    .prompt-buttons button{flex:1}
+    .attachment-section{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1)}
+    .attach-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;background:rgba(124,92,255,0.1);border:1px solid rgba(124,92,255,0.3);color:var(--accent);cursor:pointer;font-size:13px;transition:all .2s;font-weight:500}
+    .attach-btn:hover{background:rgba(124,92,255,0.2);border-color:rgba(124,92,255,0.5)}
+    #imageAttachment{display:none}
+    .attachment-preview{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:rgba(90,160,255,0.1);border:1px solid rgba(90,160,255,0.3);color:#5aa0ff;font-size:13px}
+    .attachment-preview img{width:32px;height:32px;border-radius:6px;object-fit:cover}
+    .remove-attachment{cursor:pointer;margin-left:auto;font-size:16px;color:#5aa0ff}
+    .remove-attachment:hover{color:#ff6b6b}
+    @media (max-width:768px){
+      .nav-links{gap:12px}
+      .header{flex-direction:column;gap:20px;margin-bottom:20px}
+      h1{font-size:24px}
+      .grid{grid-template-columns:1fr}
+    }
+    /* footer */
+    footer{position:fixed;bottom:0;left:0;right:0;background:rgba(11,18,32,0.8);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.04);padding:16px 28px;text-align:center;z-index:100}
+    body.light-theme footer{background:rgba(245,245,247,0.8)}
+    .footer-content{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)}
+    .footer-links{display:flex;justify-content:center;gap:16px}
+    .footer-links a{color:var(--accent);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#5aa0ff}
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-container">
+      <div class="loading-text">LOADING!!!!</div>
+      <div class="loading-dots">●●●</div>
+    </div>
+  </div>
+  <div class="header">
+    <div class="brand-header">
+      <div class="logo">Lx</div>
+      <h2 style="margin:0;font-size:20px;color:var(--text)">Lex</h2>
+    </div>
+    <nav class="nav-links">
+      <a href="#" onclick="showLoadingAndNavigate('index.html')">Home</a>
+      <a href="#" onclick="showLoadingAndNavigate('settings.html')">Settings</a>
+      <a href="#" onclick="handleSignOut(event)">Sign out</a>
+    </nav>
+  </div>
+
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+      <h2>Sign Out</h2>
+      <p>Are you sure you want to sign out?</p>
+      <div class="modal-buttons">
+        <button class="confirm" onclick="confirmSignOut()">Yes, sign out</button>
+        <button class="cancel" onclick="cancelSignOut()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="welcome">
+      <h1>Welcome back, Alex</h1>
+      <p class="subtitle">Here's what's happening with your account today</p>
+    </div>
+
+    <div class="prompt-section">
+      <h2>✨ AI Prompt</h2>
+      <textarea id="aiPrompt" class="prompt-input" placeholder="Describe what you'd like to do... (e.g., 'Change my photo to a sketch', 'Make my clothes blue', 'Edit my image')"></textarea>
+      <div class="attachment-section">
+        <button class="attach-btn" onclick="document.getElementById('imageAttachment').click()">📎 Attach Image</button>
+        <input type="file" id="imageAttachment" accept="image/*" onchange="handleImageAttachment(event)">
+        <div id="attachmentPreview" style="display:none"></div>
+      </div>
+      <div class="prompt-buttons">
+        <button class="btn secondary" onclick="clearPrompt()">Clear</button>
+        <button class="btn" onclick="submitPrompt()">Send</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card overview-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div>
+            <div class="icon">📊</div>
+            <h2 style="margin:8px 0 0">Overview</h2>
+          </div>
+          <div style="font-size:28px">👤</div>
+        </div>
+        <p>Get a quick overview of your account activity, recent logins, and system status.</p>
+        
+        <div style="background:rgba(255,255,255,0.02);border-radius:10px;padding:16px;margin:12px 0;border:1px solid rgba(255,255,255,0.04)">
+          <h3 style="margin:0 0 12px;font-size:14px;color:var(--muted)">Profile</h3>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div id="profileAvatar" style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#5aa0ff);display:grid;place-items:center;color:#fff;font-weight:700;font-size:20px;cursor:pointer;transition:all .2s;border:2px solid transparent" onclick="document.getElementById('imageInput').click()" title="Click to change profile picture">AK</div>
+            <div>
+              <p style="margin:0;font-weight:600">Alex Kwizera</p>
+              <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">alexiskwizera050@gmail.com</p>
+            </div>
+          </div>
+          <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+          <p style="margin:12px 0 0;font-size:12px;color:var(--muted)">💡 Click the avatar to upload a profile picture</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.02);border-radius:10px;padding:16px;margin:12px 0;border:1px solid rgba(255,255,255,0.04)">
+          <h3 style="margin:0 0 12px;font-size:14px;color:var(--muted)">Available Features</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(124,92,255,0.05)">
+              <span style="font-size:18px">🎨</span>
+              <div>
+                <p style="margin:0;color:var(--text);font-weight:600;font-size:13px">Color Changer</p>
+                <p style="margin:2px 0 0;color:var(--muted);font-size:11px">Change colors in any image</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(90,160,255,0.05)">
+              <span style="font-size:18px">✏️</span>
+              <div>
+                <p style="margin:0;color:var(--text);font-weight:600;font-size:13px">Sketch Converter</p>
+                <p style="margin:2px 0 0;color:var(--muted);font-size:11px">Convert images to sketches</p>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(200,150,255,0.05)">
+              <span style="font-size:18px">⚙️</span>
+              <div>
+                <p style="margin:0;color:var(--text);font-weight:600;font-size:13px">Settings</p>
+                <p style="margin:2px 0 0;color:var(--muted);font-size:11px">Customize your preferences</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn">View Details</button>
+      </div>
+
+      <div class="card">
+        <div class="icon">🚀</div>
+        <h2>Start Sketch</h2>
+        <p>Begin your journey with Lex. Set up your profile and explore core features.</p>
+        <div class="preview-image">
+          <canvas id="sketchPreview" width="280" height="180"></canvas>
+        </div>
+        <button class="btn" onclick="showLoadingAndNavigate('sketch.html')">Start Now</button>
+      </div>
+
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h2>Color Changer</h2>
+        <p>Change the color of clothes in any image with ease.</p>
+        <div class="preview-image">
+          <canvas id="clothesPreview" width="280" height="180"></canvas>
+        </div>
+        <button class="btn" onclick="showLoadingAndNavigate('clothes-changer.html')">Change Color</button>
+      </div>
+
+      <div class="card">
+        <div class="icon"></div>
+        <h2>Tips & Resources</h2>
+        <p>Discover helpful resources, tutorials, and tips to make the most of Lex.</p>
+        <button class="btn">Explore Resources</button>
+      </div>    </div>
+  </div>
+
+  <script>
+    // Typewriter effect for welcome heading
+    const welcomeHeading = document.querySelector('h1');
+    const fullText = 'Welcome back, Alex';
+    let currentIndex = 0;
+
+    function typeWriter() {
+      if (currentIndex < fullText.length) {
+        welcomeHeading.textContent = fullText.substring(0, currentIndex + 1);
+        currentIndex++;
+        setTimeout(typeWriter, 100);
+      } else {
+        // Repeat from the beginning after a delay
+        setTimeout(() => {
+          currentIndex = 0;
+          welcomeHeading.textContent = '';
+          typeWriter();
+        }, 3000);
+      }
+    }
+
+    function showLoadingAndNavigate(url) {
+      document.getElementById('loadingOverlay').classList.add('show');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 3000);
+    }
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageData = e.target.result;
+          localStorage.setItem('profileImage', imageData);
+          document.getElementById('profileAvatar').style.backgroundImage = `url(${imageData})`;
+          document.getElementById('profileAvatar').style.backgroundSize = 'cover';
+          document.getElementById('profileAvatar').style.backgroundPosition = 'center';
+          document.getElementById('profileAvatar').style.color = 'transparent';
+          document.getElementById('profileAvatar').textContent = '';
+          alert('Profile picture updated successfully!');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    function loadProfileImage() {
+      const savedImage = localStorage.getItem('profileImage');
+      if(savedImage) {
+        document.getElementById('profileAvatar').style.backgroundImage = `url(${savedImage})`;
+        document.getElementById('profileAvatar').style.backgroundSize = 'cover';
+        document.getElementById('profileAvatar').style.backgroundPosition = 'center';
+        document.getElementById('profileAvatar').style.color = 'transparent';
+        document.getElementById('profileAvatar').textContent = '';
+      }
+    }
+    function openFileExplorer() {
+      // Open file explorer at user's Desktop or Documents folder
+      const path = 'c:\\Users\\Admin\\Desktop';
+      window.location.href = 'file:///' + path;
+    }
+    function loadTheme() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if(theme !== 'dark') {
+        document.body.className = theme + '-theme';
+      }
+    }
+    loadTheme();
+    loadProfileImage();
+    function handleSignOut(e) {
+      e.preventDefault();
+      document.getElementById('confirmModal').classList.add('show');
+    }
+    function confirmSignOut() {
+      showLoadingAndNavigate('lex.html');
+    }
+    function cancelSignOut() {
+      document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    function clearPrompt() {
+      document.getElementById('aiPrompt').value = '';
+      document.getElementById('aiPrompt').focus();
+    }
+
+    function handleImageAttachment(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const preview = document.getElementById('attachmentPreview');
+          const fileName = file.name;
+          preview.innerHTML = `
+            <div class="attachment-preview">
+              <img src="${e.target.result}" alt="Attached image">
+              <span>${fileName}</span>
+              <span class="remove-attachment" onclick="removeAttachment()">✕</span>
+            </div>
+          `;
+          preview.style.display = 'block';
+          // Store the image data
+          localStorage.setItem('attachedImage', e.target.result);
+          localStorage.setItem('attachedImageName', fileName);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeAttachment() {
+      document.getElementById('imageAttachment').value = '';
+      document.getElementById('attachmentPreview').innerHTML = '';
+      document.getElementById('attachmentPreview').style.display = 'none';
+      localStorage.removeItem('attachedImage');
+      localStorage.removeItem('attachedImageName');
+    }
+
+    function submitPrompt() {
+      const prompt = document.getElementById('aiPrompt').value.trim();
+      if(!prompt) {
+        alert('Please enter a prompt');
+        return;
+      }
+
+      // Determine which tool to navigate to based on prompt keywords
+      const lowerPrompt = prompt.toLowerCase();
+      let destination = 'index.html';
+
+      if(lowerPrompt.includes('sketch') || lowerPrompt.includes('draw')) {
+        destination = 'sketch.html';
+      } else if(lowerPrompt.includes('color') || lowerPrompt.includes('cloth') || lowerPrompt.includes('change')) {
+        destination = 'clothes-changer.html';
+      } else if(lowerPrompt.includes('settings') || lowerPrompt.includes('prefer')) {
+        destination = 'settings.html';
+      }
+
+      // Save prompt to localStorage for reference
+      localStorage.setItem('lastPrompt', prompt);
+
+      // Navigate with loading animation
+      showLoadingAndNavigate(destination);
+    }
+
+    // Allow Enter key to submit prompt
+    document.addEventListener('DOMContentLoaded', () => {
+      const promptInput = document.getElementById('aiPrompt');
+      if(promptInput) {
+        promptInput.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' && e.ctrlKey) {
+            submitPrompt();
+          }
+        });
+      }
+    });
+
+    // Simple navigation highlighting
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      if(link.getAttribute('href') === currentPage) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    // Sketch Preview Animation
+    function createSketchPreview() {
+      const canvas = document.getElementById('sketchPreview');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Create a more realistic sample image (simple scene)
+      function drawOriginalSketchImage() {
+        const imgData = ctx.createImageData(width / 2, height);
+        const data = imgData.data;
+        
+        // Draw sky
+        for(let i = 0; i < data.length; i += 4) {
+          const index = i / 4;
+          const x = index % (width / 2);
+          const y = Math.floor(index / (width / 2));
+          
+          if(y < height / 2) {
+            // Sky - light blue
+            data[i] = 135;
+            data[i+1] = 206;
+            data[i+2] = 235;
+          } else {
+            // Ground - green
+            data[i] = 100;
+            data[i+1] = 150;
+            data[i+2] = 80;
+          }
+          data[i+3] = 255;
+        }
+        
+        // Draw simple objects (circles for trees)
+        ctx.putImageData(imgData, 0, 0);
+        ctx.fillStyle = 'rgba(100, 150, 80, 0.8)';
+        ctx.beginPath();
+        ctx.arc(40, 80, 25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(220, 100, 30, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(139, 90, 43, 0.8)';
+        ctx.fillRect(35, 100, 10, 40);
+        ctx.fillRect(215, 115, 10, 40);
+      }
+
+      drawOriginalSketchImage();
+
+      // Draw arrow in middle
+      setTimeout(() => {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(width / 2 - 15, height / 2);
+        ctx.lineTo(width / 2 + 15, height / 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(width / 2 + 10, height / 2 - 5);
+        ctx.lineTo(width / 2 + 15, height / 2);
+        ctx.lineTo(width / 2 + 10, height / 2 + 5);
+        ctx.stroke();
+      }, 500);
+
+      // Apply edge detection (sketch effect) after delay
+      setTimeout(() => {
+        const imageData = ctx.getImageData(0, 0, width / 2, height);
+        const newData = new Uint8ClampedArray(imageData.data.length);
+        for(let i = 0; i < imageData.data.length; i++) newData[i] = 255;
+        
+        for(let y = 1; y < height - 1; y++) {
+          for(let x = 1; x < width / 2 - 1; x++) {
+            const idx = (y * (width / 2) + x) * 4;
+            const gx = -imageData.data[(y-1)*(width/2)*4 + (x-1)*4] - 2*imageData.data[y*(width/2)*4 + (x-1)*4] - imageData.data[(y+1)*(width/2)*4 + (x-1)*4] + 
+                       imageData.data[(y-1)*(width/2)*4 + (x+1)*4] + 2*imageData.data[y*(width/2)*4 + (x+1)*4] + imageData.data[(y+1)*(width/2)*4 + (x+1)*4];
+            const gy = -imageData.data[(y-1)*(width/2)*4 + (x-1)*4] - 2*imageData.data[(y-1)*(width/2)*4 + x*4] - imageData.data[(y-1)*(width/2)*4 + (x+1)*4] + 
+                       imageData.data[(y+1)*(width/2)*4 + (x-1)*4] + 2*imageData.data[(y+1)*(width/2)*4 + x*4] + imageData.data[(y+1)*(width/2)*4 + (x+1)*4];
+            const edge = Math.sqrt(gx*gx + gy*gy) / 8;
+            const val = Math.max(0, 255 - edge);
+            newData[idx] = newData[idx+1] = newData[idx+2] = val;
+            newData[idx+3] = 255;
+          }
+        }
+        imageData.data.set(newData);
+        ctx.putImageData(imageData, width / 2, 0);
+      }, 1000);
+    }
+
+    // Clothes Changer Preview Animation
+    function createClothesPreview() {
+      const canvas = document.getElementById('clothesPreview');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      function drawPersonWithClothes(startX, clothesColor) {
+        // Skin background
+        ctx.fillStyle = clothesColor.skin;
+        ctx.fillRect(startX, 0, width / 2, height);
+        
+        // Draw simple person
+        ctx.fillStyle = clothesColor.head;
+        ctx.beginPath();
+        ctx.arc(startX + width / 4, 30, 15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Body (clothes)
+        ctx.fillStyle = clothesColor.clothes;
+        ctx.fillRect(startX + (width / 4 - 15), 50, 30, 50);
+        
+        // Arms
+        ctx.fillStyle = clothesColor.clothes;
+        ctx.fillRect(startX + (width / 4 - 40), 55, 25, 15);
+        ctx.fillRect(startX + (width / 4 + 15), 55, 25, 15);
+        
+        // Legs
+        ctx.fillStyle = clothesColor.pants;
+        ctx.fillRect(startX + (width / 4 - 10), 105, 10, 50);
+        ctx.fillRect(startX + (width / 4 + 5), 105, 10, 50);
+      }
+
+      // Draw original with red clothes
+      drawPersonWithClothes(0, {
+        skin: '#f5d5b8',
+        head: '#d4a574',
+        clothes: '#c41e3a',
+        pants: '#333333'
+      });
+
+      // Draw arrow in middle
+      setTimeout(() => {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(width / 2 - 18, height / 2);
+        ctx.lineTo(width / 2 + 18, height / 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(width / 2 + 12, height / 2 - 6);
+        ctx.lineTo(width / 2 + 18, height / 2);
+        ctx.lineTo(width / 2 + 12, height / 2 + 6);
+        ctx.stroke();
+      }, 500);
+
+      // Change clothes color after delay
+      setTimeout(() => {
+        drawPersonWithClothes(width / 2, {
+          skin: '#f5d5b8',
+          head: '#d4a574',
+          clothes: '#1e90ff',
+          pants: '#333333'
+        });
+      }, 1000);
+    }
+
+    // Initialize previews
+    createSketchPreview();
+    createClothesPreview();
+  </script>
+  <footer>
+    <div class="footer-content">
+      <p style="margin:0">© 2026 Lex. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="https://wa.me/250729450139" target="_blank" title="WhatsApp">WhatsApp</a>
+        <a href="https://facebook.com" target="_blank" title="Facebook">Facebook</a>
+        <a href="tel:+250729450139" title="Phone">+250729450139</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

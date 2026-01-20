@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sketch Editor — Lex</title>
+  <style>
+    :root{--bg1:#0f172a;--bg2:#0b1220;--card:#0b1226;--accent:#7c5cff;--muted:#9aa4bf;--text:#e6eef8}
+    body.light-theme {
+      --bg1:#f5f5f7;--bg2:#ffffff;--card:#ffffff;--accent:#7c5cff;--muted:#6b7280;--text:#1f2937;
+    }
+    body.auto-theme {
+      color-scheme: light dark;
+    }
+    *{box-sizing:border-box}
+    body{min-height:100vh;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);padding:20px}
+    .header{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto 30px;padding:0 28px}
+    .brand-header{display:flex;align-items:center;gap:10px}
+    .logo{width:40px;height:40px;border-radius:10px;display:inline-grid;place-items:center;background:linear-gradient(135deg,#fff2 0%,#ffffff05 100%);color:var(--accent);font-weight:700}
+    .nav-links{display:flex;gap:24px}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-links a.active{color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px}
+    .container{max-width:1200px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:28px}
+    .subtitle{color:var(--muted);font-size:14px;margin:0 0 30px}
+    .sketch-container{display:grid;grid-template-columns:1fr 300px;gap:30px}
+    .sketch-canvas-wrapper{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:24px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
+    body.light-theme .sketch-canvas-wrapper{background:linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:rgba(0,0,0,0.06)}
+    #canvas{border:2px solid rgba(124,92,255,0.3);border-radius:10px;display:block;background:#fff;cursor:crosshair}
+    .controls{display:flex;flex-direction:column;gap:20px}
+    .control-card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:20px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
+    body.light-theme .control-card{background:linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:rgba(0,0,0,0.06)}
+    .control-card h3{margin:0 0 12px;font-size:14px;color:var(--text);font-weight:600}
+    .control-group{display:flex;flex-direction:column;gap:8px}
+    .control-label{font-size:12px;color:var(--muted)}
+    input[type="range"]{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);outline:none;-webkit-appearance:none}
+    input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+    input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
+    input[type="color"]{width:100%;height:40px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);cursor:pointer}
+    input[type="file"]{display:none}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#5aa0ff);color:#081126;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s;font-size:13px;width:100%;text-decoration:none;gap:8px}
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
+    .btn.secondary:hover{color:#e6eef8;border-color:rgba(255,255,255,0.08)}
+    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(11,18,32,0.95));display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px)}
+    .loading-overlay.show{display:flex}
+    .loading-container{text-align:center;animation:fadeInScale .4s cubic-bezier(.2,.9,.3,1) both}
+    @keyframes fadeInScale{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .loading-text{font-size:48px;font-weight:700;color:var(--accent);margin:0 0 24px;letter-spacing:2px;animation:pulse 1s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.8}}
+    .loading-dots{font-size:32px;color:var(--accent);letter-spacing:8px;animation:blink 1.4s infinite}
+    @keyframes blink{0%,20%,50%,80%,100%{opacity:1}40%{opacity:.3}60%{opacity:.3}}
+    /* responsive */
+    @media (max-width:768px){
+      .sketch-container{grid-template-columns:1fr}
+      .header{flex-direction:column;gap:20px}
+      .nav-links{gap:12px}
+    }
+    /* footer */
+    footer{position:fixed;bottom:0;left:0;right:0;background:rgba(11,18,32,0.8);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.04);padding:16px 28px;text-align:center;z-index:100}
+    body.light-theme footer{background:rgba(245,245,247,0.8)}
+    .footer-content{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)}
+    .footer-links{display:flex;justify-content:center;gap:16px}
+    .footer-links a{color:var(--accent);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#5aa0ff}
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-container">
+      <div class="loading-text">LOADING!!!!</div>
+      <div class="loading-dots">●●●</div>
+    </div>
+  </div>
+  <div class="header">
+    <div class="brand-header">
+      <div class="logo">Lx</div>
+      <h2 style="margin:0;font-size:20px;color:var(--text)">Lex</h2>
+    </div>
+    <nav class="nav-links">
+      <a href="#" onclick="showLoadingAndNavigate('index.html')">Home</a>
+      <a href="#" onclick="showLoadingAndNavigate('settings.html')">Settings</a>
+      <a href="#" onclick="handleSignOut(event)">Sign out</a>
+    </nav>
+  </div>
+
+  <div class="container">
+    <h1>Sketch Editor</h1>
+    <p class="subtitle">Upload an image and convert it to a sketch, or draw directly on the canvas</p>
+
+    <div class="sketch-container">
+      <div class="sketch-canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="controls">
+        <div class="control-card">
+          <h3>Image Upload</h3>
+          <button class="btn secondary" onclick="document.getElementById('imageInput').click()">📁 Upload Image</button>
+          <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+        </div>
+
+        <div class="control-card">
+          <h3>Drawing Tools</h3>
+          <div class="control-group">
+            <label class="control-label">Tool Mode</label>
+            <select id="toolMode" style="width:100%;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:inherit;font-size:13px;outline:none">
+              <option value="pen">✏️ Pen</option>
+              <option value="blur">🔲 Blur</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label class="control-label">Brush Size</label>
+            <input type="range" id="brushSize" min="1" max="50" value="3">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Brush Color</label>
+            <input type="color" id="brushColor" value="#000000">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn secondary" onclick="clearCanvas()" style="flex:1">Clear</button>
+            <button class="btn" onclick="downloadCanvas()" style="flex:1">📥 Download</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <h3>Sketch Effect</h3>
+          <button class="btn secondary" onclick="applySketchEffect()">✏️ Convert to Sketch</button>
+          <button class="btn secondary" onclick="resetImage()" style="margin-top:8px">Reset Image</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-content">
+      <p style="margin:0">© 2026 Lex. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="https://wa.me/250729450139" target="_blank" title="WhatsApp">WhatsApp</a>
+        <a href="https://facebook.com" target="_blank" title="Facebook">Facebook</a>
+        <a href="tel:+250729450139" title="Phone">+250729450139</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function loadTheme() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if(theme !== 'dark') {
+        document.body.className = theme + '-theme';
+      }
+    }
+    loadTheme();
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const brushSize = document.getElementById('brushSize');
+    const brushColor = document.getElementById('brushColor');
+    const toolMode = document.getElementById('toolMode');
+    let isDrawing = false;
+    let originalImage = null;
+
+    // Set canvas size
+    canvas.width = 600;
+    canvas.height = 400;
+
+    // Blur function
+    function blurArea(x, y, size) {
+      const radius = size;
+      const imageData = ctx.getImageData(Math.max(0, x - radius), Math.max(0, y - radius), 
+                                         Math.min(canvas.width, radius * 2), Math.min(canvas.height, radius * 2));
+      const data = imageData.data;
+
+      // Pixelate effect
+      const pixelSize = Math.max(3, Math.floor(size / 4));
+      for(let i = 0; i < data.length; i += 4) {
+        if(Math.random() > 0.3) {
+          const randomIdx = Math.floor(Math.random() * (data.length / 4)) * 4;
+          data[i] = data[randomIdx];
+          data[i+1] = data[randomIdx+1];
+          data[i+2] = data[randomIdx+2];
+        }
+      }
+
+      ctx.putImageData(imageData, Math.max(0, x - radius), Math.max(0, y - radius));
+    }
+
+    // Drawing with blur
+    function drawWithMode(x, y) {
+      if(toolMode.value === 'blur') {
+        blurArea(x, y, brushSize.value * 2);
+      } else {
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = brushColor.value;
+        ctx.lineWidth = brushSize.value;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      }
+    }
+
+    // Drawing functions
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if(!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      drawWithMode(x, y);
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+    });
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            originalImage = img;
+            canvas.width = img.width > 800 ? 800 : img.width;
+            canvas.height = (img.height / img.width) * canvas.width;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function applySketchEffect() {
+      if(!originalImage && canvas.toDataURL() === 'data:,') {
+        alert('Please upload an image first');
+        return;
+      }
+
+      // Get current canvas image
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Convert to grayscale
+      for(let i = 0; i < data.length; i += 4) {
+        const gray = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
+        data[i] = gray;
+        data[i+1] = gray;
+        data[i+2] = gray;
+        data[i+3] = 255;
+      }
+
+      // Apply Sobel edge detection
+      const edges = new Uint8ClampedArray(data.length);
+      
+      for(let y = 1; y < height - 1; y++) {
+        for(let x = 1; x < width - 1; x++) {
+          const idx = (y * width + x) * 4;
+          
+          // Sobel X kernel
+          const gx = -data[((y-1)*width+(x-1))*4] - 2*data[((y)*width+(x-1))*4] - data[((y+1)*width+(x-1))*4]
+                     + data[((y-1)*width+(x+1))*4] + 2*data[((y)*width+(x+1))*4] + data[((y+1)*width+(x+1))*4];
+          
+          // Sobel Y kernel
+          const gy = -data[((y-1)*width+(x-1))*4] - 2*data[((y-1)*width+(x))*4] - data[((y-1)*width+(x+1))*4]
+                     + data[((y+1)*width+(x-1))*4] + 2*data[((y+1)*width+(x))*4] + data[((y+1)*width+(x+1))*4];
+          
+          const magnitude = Math.sqrt(gx*gx + gy*gy);
+          edges[idx] = magnitude > 100 ? 0 : 255;
+          edges[idx+1] = magnitude > 100 ? 0 : 255;
+          edges[idx+2] = magnitude > 100 ? 0 : 255;
+          edges[idx+3] = 255;
+        }
+      }
+
+      // Create inverted sketch effect
+      const sketchData = new ImageData(edges, width, height);
+      ctx.putImageData(sketchData, 0, 0);
+    }
+
+    function resetImage() {
+      if(originalImage) {
+        ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        clearCanvas();
+      }
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function downloadCanvas() {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'sketch-' + new Date().getTime() + '.png';
+      link.click();
+    }
+
+    function showLoadingAndNavigate(url) {
+      document.getElementById('loadingOverlay').classList.add('show');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 3000);
+    }
+
+    function handleSignOut(e) {
+      e.preventDefault();
+      showLoadingAndNavigate('lex.html');
+    }
+
+    // Initialize canvas
+    clearCanvas();
+  </script>
+</body>
+</html>

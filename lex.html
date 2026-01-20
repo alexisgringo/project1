@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Lex</title>
+  <style>
+    :root{--bg1:#0f172a;--bg2:#0b1220;--card:#0b1226;--accent:#7c5cff;--muted:#9aa4bf;--text:#e6eef8}
+    body.light-theme {
+      --bg1:#f5f5f7;--bg2:#ffffff;--card:#ffffff;--accent:#7c5cff;--muted:#6b7280;--text:#1f2937;
+    }
+    body.auto-theme {
+      color-scheme: light dark;
+    }
+    *{box-sizing:border-box}
+    body{min-height:100vh;margin:0;font-family:Inter,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,var(--bg1),var(--bg2));display:grid;place-items:center;color:var(--text);padding-bottom:120px}
+    .wrap{width:100%;max-width:420px;padding:28px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:28px 24px;backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04);transform-origin:center;animation:lift .7s cubic-bezier(.2,.9,.3,1) both}
+    body.light-theme .card{background:linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.1);border-color:rgba(0,0,0,0.06)}
+    @keyframes lift{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted);font-size:13px}
+    form{display:grid;gap:12px}
+    .field{position:relative}
+    input{width:100%;padding:14px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;font-size:14px;outline:none;transition:box-shadow .18s,transform .12s,border-color .12s}
+    body.light-theme input{border-color:rgba(0,0,0,0.1);background:rgba(0,0,0,0.02)}
+    input::placeholder{color:rgba(230,238,248,0.35)}
+    input:focus{box-shadow:0 6px 20px rgba(124,92,255,0.14);border-color:rgba(124,92,255,0.6);transform:translateY(-2px)}
+    .row{display:flex;gap:10px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#5aa0ff);color:#081126;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s}
+    .btn:active{transform:translateY(1px)}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
+    .link{color:rgba(255,255,255,0.75);text-decoration:none}
+    .logo{width:40px;height:40px;border-radius:10px;display:inline-grid;place-items:center;margin-right:10px;background:linear-gradient(135deg,#fff2 0%,#ffffff05 100%);color:var(--accent);font-weight:700}
+    .brand{display:flex;align-items:center;margin-bottom:14px}
+    .small{font-size:12px;color:var(--muted)}
+    .forgot{color:var(--muted);text-decoration:none}
+    /* floating labels */
+    label.floater{position:absolute;left:12px;top:12px;pointer-events:none;font-size:12px;color:var(--muted);transform-origin:left top;transition:transform .14s,opacity .14s}
+    input:not(:placeholder-shown) + label.floater, input:focus + label.floater{transform:translateY(-14px) scale(.86);opacity:.95}
+    /* shake animation for invalid */
+    @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(6px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(4px)}}
+    .shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97)}
+    /* success toast */
+    .toast{position:fixed;right:18px;top:18px;background:linear-gradient(90deg,#e8ffe9,#d8f8ea);color:#063b1f;padding:10px 14px;border-radius:10px;box-shadow:0 6px 22px rgba(2,6,23,0.45);display:none}
+    .toast.show{display:block}
+    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(11,18,32,0.95));display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(8px)}
+    .loading-overlay.show{display:flex}
+    .loading-container{text-align:center;animation:fadeInScale .4s cubic-bezier(.2,.9,.3,1) both}
+    @keyframes fadeInScale{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .loading-text{font-size:48px;font-weight:700;color:var(--accent);margin:0 0 24px;letter-spacing:2px;animation:pulse 1s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.8}}
+    .loading-dots{font-size:32px;color:var(--accent);letter-spacing:8px;animation:blink 1.4s infinite}
+    @keyframes blink{0%,20%,50%,80%,100%{opacity:1}40%{opacity:.3}60%{opacity:.3}}
+    .header{display:flex;justify-content:space-between;align-items:center;position:absolute;top:20px;left:0;right:0;padding:0 28px}
+    .brand-header{display:flex;align-items:center;gap:10px}
+    .logo-header{width:40px;height:40px;border-radius:10px;display:inline-grid;place-items:center;background:linear-gradient(135deg,#fff2 0%,#ffffff05 100%);color:var(--accent);font-weight:700}
+    .nav-links{display:flex;gap:24px}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+    .nav-links a:hover{color:#e6eef8}
+    /* responsive */
+    @media (max-width:420px){.wrap{padding:18px}.header{padding:0 18px;flex-direction:column;gap:12px}}
+    /* footer */
+    footer{position:fixed;bottom:0;left:0;right:0;background:rgba(11,18,32,0.8);backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.04);padding:16px 28px;text-align:center}
+    body.light-theme footer{background:rgba(245,245,247,0.8)}
+    .footer-content{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)}
+    .footer-links{display:flex;justify-content:center;gap:16px}
+    .footer-links a{color:var(--accent);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:#5aa0ff}
+    .footer-links svg{width:16px;height:16px;vertical-align:middle}  
+  </style>
+</head>
+<body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-container">
+      <div class="loading-text">LOADING!!!</div>
+      <div class="loading-dots">●●●</div>
+    </div>
+  </div>
+  <div class="header">
+    <div class="brand-header">
+      <div class="logo-header">Lx</div>
+      <h2 style="margin:0;font-size:20px;color:var(--text)">Lex</h2>
+    </div>
+    <nav class="nav-links">
+      <a href="#" onclick="showLoadingAndNavigate('index.html')">Home</a>
+      <a href="#" onclick="showLoadingAndNavigate('settings.html')">Settings</a>
+    </nav>
+  </div>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="brand">
+        <div class="logo">Lx</div>
+        <div>
+          <h1>Welcome back</h1>
+          <p class="lead">Sign in to continue to Lex</p>
+        </div>
+      </div>
+      <form id="login">
+        <div class="field">
+          <input id="email" name="email" type="email" placeholder=" " autocomplete="username">
+          <label class="floater" for="email">Email</label>
+        </div>
+        <div class="field">
+          <input id="password" name="password" type="password" placeholder=" " autocomplete="current-password">
+          <label class="floater" for="password">Password</label>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <button type="submit" class="btn" id="submit">Sign in</button>
+          <button type="button" class="btn" id="demo" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)">Demo</button>
+        </div>
+        <div class="meta">
+          <label class="small"><input type="checkbox" style="margin-right:8px">Remember me</label>
+          <a href="#" class="forgot small">Forgot?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="toast" id="toast">Signed in successfully — welcome!</div>
+  <footer>
+    <div class="footer-content">
+      <p style="margin:0">© 2026 Lex. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="https://wa.me/250729450139" target="_blank" title="WhatsApp">WhatsApp</a>
+        <a href="https://facebook.com" target="_blank" title="Facebook">Facebook</a>
+        <a href="tel:+250729450139" title="Phone">+250729450139</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    function showLoadingAndNavigate(url) {
+      document.getElementById('loadingOverlay').classList.add('show');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 3000);
+    }
+    function loadTheme() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if(theme !== 'dark') {
+        document.body.className = theme + '-theme';
+      }
+    }
+    loadTheme();
+    const form = document.getElementById('login');
+    const email = document.getElementById('email');
+    const pass = document.getElementById('password');
+    const card = document.getElementById('card');
+    const toast = document.getElementById('toast');
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const correctEmail = 'alexiskwizera050@gmail.com';
+      const correctPassword = 'alexis$$';
+      if(email.value.trim() !== correctEmail || pass.value.trim() !== correctPassword){
+        card.classList.remove('shake');
+        // reflow to restart animation
+        void card.offsetWidth;
+        card.classList.add('shake');
+        return;
+      }
+      // Show loading overlay on valid login
+      document.getElementById('loadingOverlay').classList.add('show');
+      setTimeout(()=>{
+        window.location.href = 'index.html';
+      }, 3000);
+      form.reset();
+    });
+    document.getElementById('demo').addEventListener('click', ()=>{
+      email.value = 'demo@lex.example';
+      pass.value = 'password123';
+      // subtle highlight
+      email.animate([{background:'#ffffff0a'},{background:'transparent'}],{duration:800});
+      pass.animate([{background:'#ffffff0a'},{background:'transparent'}],{duration:800});
+    });
+  </script>
+</body>
+</html>
